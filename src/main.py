@@ -30,6 +30,8 @@ class Table:
             column_number += 1
     
     def create_column(self, column_name: str, column_dtype: Any):
+        if self.columns.__contains__(column_name):
+            raise ValueError(f"Column with name {column_name} already exists in table {self.name}")
         column = Column(column_name, column_dtype)
         self.columns[column_name] = column
         return column
@@ -38,8 +40,10 @@ class Table:
         for column_name_entry in row_content.keys():
             if self.columns.__contains__(column_name_entry) == False:
                 raise ValueError(f"Column with column name {column_name_entry} doesn't exist")
+            if type(row_content[column_name_entry]) != self.columns[column_name_entry].dtype:
+                raise TypeError(f"Column {column_name_entry} has datatype {self.columns[column_name_entry].dtype} but row content has datatype {type(row_content[column_name_entry])}")
             
-        self.rows.append(row_content)
+        self.rows.append(row_content.copy())
             
             
 class Database:
@@ -52,7 +56,7 @@ class Database:
         table = Table(table_name)
         if self.tables.__contains__(table_name):
             raise ValueError(f"Table with name {table_name} already exists in database {self.name}")
-        else:
+        else:   
             self.tables[table_name] = table
         
         return table
